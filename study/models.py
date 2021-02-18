@@ -7,7 +7,7 @@ class Student(models.Model):
     fullname = models.CharField(max_length=254)
     email = models.CharField(max_length=254)
     birthday = models.DateField()
-    level = models.IntegerField()
+    level = models.IntegerField(default=0)
     image_id = models.IntegerField()
 
 
@@ -21,15 +21,17 @@ class Teacher(models.Model):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=64)
+    english = models.CharField(max_length=64)
 
 
 class Content(models.Model):
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     teacher = models.ForeignKey('Teacher', on_delete=models.CASCADE)
     title = models.CharField(max_length=254)
+    type = models.IntegerField()
     content = models.TextField()
     level = models.IntegerField()
+    # view_count, total
 
 
 class Curriculum(models.Model):
@@ -37,9 +39,4 @@ class Curriculum(models.Model):
     content = models.ForeignKey('Content', on_delete=models.CASCADE)
     percentage = models.IntegerField()
     score = models.IntegerField(null=True)
-
-
-class DownloadHistory(models.Model):
-    student = models.ForeignKey('Student', on_delete=models.CASCADE)
-    content = models.ForeignKey('Content', on_delete=models.CASCADE)
-    datetime = models.DateTimeField(auto_now_add=True)
+    end_datetime = models.DateTimeField(null=True)
