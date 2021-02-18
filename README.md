@@ -1,1 +1,1 @@
-# Earndu-Server
+# EarnduServer
