@@ -1,5 +1,17 @@
 from django.http import JsonResponse
 from study.models import Teacher
+import json
+
+
+def get_body(request):
+    """
+    :param request: Django http request instance
+    :return: data from x-www-form-urlencoded or json body
+    """
+    try:
+        return json.loads(request.body)
+    except:
+        return request.POST
 
 
 def verify_data(data: dict, contains: list) -> str or None:
