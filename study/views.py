@@ -91,6 +91,21 @@ def teacher_login(request):
         return get_response(405, [request.method, 'POST'])
 
 
+def logout(request):
+    if request.method == 'GET':
+        student = logged_in_student(request)
+        teacher = logged_in_teacher(request)
+        if teacher is None and student is None:
+            return get_response(401)
+        if 'student' in request.session:
+            del request.session['student']
+        if 'teacher' in request.session:
+            del request.session['teacher']
+        return get_response(200)
+    else:
+        return get_response(405, [request.method, 'GET'])
+
+
 def student_many(request):
     if request.method == 'POST':
         body = get_body(request)
