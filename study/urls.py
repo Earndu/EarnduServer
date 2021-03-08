@@ -10,4 +10,5 @@ urlpatterns = [
     path('category', views.category_many),
     path('content', views.content_many),
     path('content/<int:content_id>', views.content_one),
+    path('logout', views.logout),
 ]
