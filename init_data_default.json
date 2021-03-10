@@ -1,0 +1,23 @@
+[
+  {
+    "model": "study.Category",
+    "pk": 1,
+    "fields": {
+      "english": "Math"
+    }
+  },
+  {
+    "model": "study.Category",
+    "pk": 2,
+    "fields": {
+      "english": "Science"
+    }
+  },
+  {
+    "model": "study.Category",
+    "pk": 3,
+    "fields": {
+      "english": "English"
+    }
+  }
+]
