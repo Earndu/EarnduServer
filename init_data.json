@@ -19,5 +19,77 @@
     "fields": {
       "english": "English"
     }
+  },
+  {
+    "model": "study.Teacher",
+    "pk": 1,
+    "fields": {
+      "username": "teacher01",
+      "password": "teacher01",
+      "fullname": "Teacher1",
+      "email": "teacher01@example.com",
+      "birthday": "1980-01-01",
+      "account": "Shinhan 000-000-000000"
+    }
+  },
+  {
+    "model": "study.Teacher",
+    "pk": 2,
+    "fields": {
+      "username": "teacher02",
+      "password": "teacher02",
+      "fullname": "Teacher2",
+      "email": "teacher02@example.com",
+      "birthday": "1980-01-01",
+      "account": "Shinhan 000-000-000000"
+    }
+  },
+  {
+    "model": "study.Student",
+    "pk": 1,
+    "fields": {
+      "username": "student01",
+      "password": "student01",
+      "fullname": "Student1",
+      "email": "student01@example.com",
+      "birthday": "1980-01-01",
+      "image_id": 1
+    }
+  },
+  {
+    "model": "study.Student",
+    "pk": 2,
+    "fields": {
+      "username": "student02",
+      "password": "student02",
+      "fullname": "Student2",
+      "email": "student02@example.com",
+      "birthday": "1980-01-01",
+      "image_id": 1
+    }
+  },
+  {
+    "model": "study.Content",
+    "pk": 1,
+    "fields": {
+      "category_id": 1,
+      "teacher_id": 1,
+      "title": "Test Content 1",
+      "type": 1,
+      "content": "This is main content of Test Content 1.",
+      "level": 100
+    }
+  },
+  {
+    "model": "study.Content",
+    "pk": 2,
+    "fields": {
+      "category_id": 2,
+      "teacher_id": 2,
+      "title": "Test Content 2",
+      "type": 2,
+      "content": "This is main content of Test Content 2.",
+      "level": 200
+    }
   }
 ]
