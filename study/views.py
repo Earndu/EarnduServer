@@ -48,7 +48,7 @@ def teacher_many(request):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'POST', 'PUT'])
+        return get_response(405, data=[request.method, 'POST', 'PUT'])
 
 
 def teacher_one(request, teacher_id):
@@ -62,7 +62,7 @@ def teacher_one(request, teacher_id):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'GET'])
+        return get_response(405, data=[request.method, 'GET'])
 
 
 def teacher_login(request):
@@ -88,7 +88,7 @@ def teacher_login(request):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'POST'])
+        return get_response(405, data=[request.method, 'POST'])
 
 
 def logout(request):
@@ -103,7 +103,7 @@ def logout(request):
             del request.session['teacher']
         return get_response(200)
     else:
-        return get_response(405, [request.method, 'GET'])
+        return get_response(405, data=[request.method, 'GET'])
 
 
 def student_many(request):
@@ -148,7 +148,7 @@ def student_many(request):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'POST', 'PUT'])
+        return get_response(405, data=[request.method, 'POST', 'PUT'])
 
 
 def student_login(request):
@@ -173,7 +173,7 @@ def student_login(request):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'POST'])
+        return get_response(405, data=[request.method, 'POST'])
 
 
 def category_many(request):
@@ -192,7 +192,7 @@ def category_many(request):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'GET'])
+        return get_response(405, data=[request.method, 'GET'])
 
 
 def content_many(request):
@@ -218,7 +218,7 @@ def content_many(request):
             )
             return get_response(200)
         except Category.DoesNotExist:
-            return get_response(400, 'Category does not exist.')
+            return get_response(400, msg='Category does not exist.')
         except:
             traceback.print_exc()
             return get_response(500)
@@ -244,7 +244,7 @@ def content_many(request):
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'POST', 'GET'])
+        return get_response(405, data=[request.method, 'POST', 'GET'])
 
 
 def content_one(request, content_id: int):
@@ -259,12 +259,12 @@ def content_one(request, content_id: int):
             data = get_detail_content(content)
             return get_response(200, data=data)
         except Content.DoesNotExist:
-            return get_response(400, 'Content does not exist.')
+            return get_response(400, msg='Content does not exist.')
         except:
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'GET'])
+        return get_response(405, data=[request.method, 'GET'])
 
 
 def curriculum_many(request):
@@ -287,14 +287,16 @@ def curriculum_many(request):
                 if 'score' in content:
                     # Save score and end datetime if student take test
                     curriculum.score = content['score']
-                    curriculum.end_datetime = timezone.now()
+                    curriculum.end_datetime = content['end_datetime'] \
+                        if 'end_datetime' in content \
+                        else timezone.now()
                 curriculum.save()
 
-                return get_response(200)
+            return get_response(200)
         except Student.DoesNotExist:
-            return get_response(400, 'Student does not exist.')
+            return get_response(400, msg='Student does not exist.')
         except Content.DoesNotExist:
-            return get_response(400, 'Content does not exist.')
+            return get_response(400, msg='Content does not exist.')
         except:
             traceback.print_exc()
             return get_response(500)
@@ -304,10 +306,10 @@ def curriculum_many(request):
             return get_response(401)
         try:
             contents = Curriculum.objects.filter(student=student)
-            data = [{'content_id': c.id, 'percentage': c.percentage, 'score': c.score} for c in contents]
+            data = [{'content_id': c.id, 'percentage': c.percentage, 'score': c.score, 'end_datetime': c.end_datetime} for c in contents]
             return get_response(200, data=data)
         except:
             traceback.print_exc()
             return get_response(500)
     else:
-        return get_response(405, [request.method, 'POST', 'GET'])
+        return get_response(405, data=[request.method, 'POST', 'GET'])

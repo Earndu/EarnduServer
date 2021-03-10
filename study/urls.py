@@ -11,4 +11,5 @@ urlpatterns = [
     path('content', views.content_many),
     path('content/<int:content_id>', views.content_one),
     path('logout', views.logout),
+    path('curriculum', views.curriculum_many),
 ]

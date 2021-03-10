@@ -60,7 +60,7 @@ def get_response(code: int, data: dict or list = None, msg: str = None) -> JsonR
             'status_code': code,
             'message': 'Success'
         }
-        if data:
+        if data is not None:
             response['data'] = data
         return JsonResponse(response)
     elif code == 400:  # Unknown user error
