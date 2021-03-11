@@ -5,6 +5,9 @@ from django.db.utils import IntegrityError
 from study.utils import get_response, verify_data, to_json, get_body, logged_in_student, logged_in_teacher, \
     get_detail_content
 from django.utils import timezone
+import logging
+
+logger = logging.getLogger('std.file')
 
 
 def teacher_many(request):
@@ -13,7 +16,7 @@ def teacher_many(request):
         required = ['username', 'password', 'fullname', 'email', 'birthday', 'account']
         verify = verify_data(body, required)
         if verify:
-            return get_response(400, msg='(%s) is required in body.' % (', '.join(required)))
+            return get_response(logger, request, 400, msg='(%s) is required in body.' % (', '.join(required)))
 
         try:
             Teacher.objects.create(
@@ -25,16 +28,16 @@ def teacher_many(request):
                 account=body['account']
             )
 
-            return get_response(200)
+            return get_response(logger, request, 200)
         except IntegrityError:
-            return get_response(400, msg='Username already exists. (%s)' %body['username'])
+            return get_response(logger, request, 400, msg='Username already exists. (%s)' %body['username'])
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500)
     elif request.method == 'PUT':
         teacher = logged_in_teacher(request)
         if teacher is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
         body = get_body(request)
 
         try:
@@ -43,26 +46,12 @@ def teacher_many(request):
             if 'birthday' in body: teacher.birthday = body['birthday']
             teacher.save()
 
-            return get_response(200)
+            return get_response(logger, request, 200, teacher_id=teacher.id)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500, teacher_id=teacher.id)
     else:
-        return get_response(405, data=[request.method, 'POST', 'PUT'])
-
-
-def teacher_one(request, teacher_id):
-    if request.method == 'GET':
-        try:
-            teacher = Teacher.objects.get(id=teacher_id)
-            return get_response(200, to_json(teacher))
-        except Teacher.DoesNotExist:
-            return get_response(400, msg='Teacher id does not exist. (%s)' % teacher_id)
-        except:
-            traceback.print_exc()
-            return get_response(500)
-    else:
-        return get_response(405, data=[request.method, 'GET'])
+        return get_response(logger, request, 405, data=[request.method, 'POST', 'PUT'])
 
 
 def teacher_login(request):
@@ -70,25 +59,25 @@ def teacher_login(request):
         teacher_id = request.session.get('teacher')
         if teacher_id:
             teacher = Teacher.objects.get(id=teacher_id)
-            return get_response(400, msg='User has already logged in. (%s)' % teacher.username)
+            return get_response(logger, request, 400, msg='User has already logged in. (%s)' % teacher.username)
 
         body = get_body(request)
         required = ['username', 'password']
         verify = verify_data(body, required)
         if verify:
-            return get_response(400, msg='(%s) is required in body.' % (', '.join(required)))
+            return get_response(logger, request, 400, msg='(%s) is required in body.' % (', '.join(required)))
 
         try:
             teacher = Teacher.objects.get(username=body['username'], password=body['password'])
             request.session['teacher'] = teacher.id
-            return get_response(200)
+            return get_response(logger, request, 200, teacher_id=teacher.id)
         except Teacher.DoesNotExist:
-            return get_response(400, msg='Username or password does not match.')
+            return get_response(logger, request, 400, msg='Username or password does not match.')
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500)
     else:
-        return get_response(405, data=[request.method, 'POST'])
+        return get_response(logger, request, 405, data=[request.method, 'POST'])
 
 
 def logout(request):
@@ -96,14 +85,16 @@ def logout(request):
         student = logged_in_student(request)
         teacher = logged_in_teacher(request)
         if teacher is None and student is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
         if 'student' in request.session:
             del request.session['student']
         if 'teacher' in request.session:
             del request.session['teacher']
-        return get_response(200)
+        return get_response(logger, request, 200,
+                            teacher_id=teacher.id if teacher is not None else None,
+                            student_id=student.id if student is not None else None)
     else:
-        return get_response(405, data=[request.method, 'GET'])
+        return get_response(logger, request, 405, data=[request.method, 'GET'])
 
 
 def student_many(request):
@@ -124,16 +115,16 @@ def student_many(request):
                 image_id=body['image_id']
             )
 
-            return get_response(200)
+            return get_response(logger, request, 200)
         except IntegrityError:
-            return get_response(400, msg='Username already exists. (%s)' %body['username'])
+            return get_response(logger, request, 400, msg='Username already exists. (%s)' %body['username'])
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500)
     elif request.method == 'PUT':
         student = logged_in_student(request)
         if student is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
         body = get_body(request)
 
         try:
@@ -143,19 +134,19 @@ def student_many(request):
             if 'image_id' in body: student.image_id = body['image_id']
             student.save()
 
-            return get_response(200)
+            return get_response(logger, request, 200, student_id=student.id)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500, student_id=student.id)
     else:
-        return get_response(405, data=[request.method, 'POST', 'PUT'])
+        return get_response(logger, request, 405, data=[request.method, 'POST', 'PUT'])
 
 
 def student_login(request):
     if request.method == 'POST':
         student = logged_in_student(request)
         if student is not None:
-            return get_response(400, msg='User has already logged in. (%s)' % student.username)
+            return get_response(logger, request, 400, msg='User has already logged in. (%s)' % student.username)
 
         body = get_body(request)
         required = ['username', 'password']
@@ -166,14 +157,14 @@ def student_login(request):
         try:
             student = Student.objects.get(username=body['username'], password=body['password'])
             request.session['student'] = student.id
-            return get_response(200)
+            return get_response(logger, request, 200, student_id=student.id)
         except Student.DoesNotExist:
-            return get_response(400, msg='Username or password does not match.')
+            return get_response(logger, request, 400, msg='Username or password does not match.')
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500)
     else:
-        return get_response(405, data=[request.method, 'POST'])
+        return get_response(logger, request, 405, data=[request.method, 'POST'])
 
 
 def category_many(request):
@@ -181,25 +172,29 @@ def category_many(request):
         student = logged_in_student(request)
         teacher = logged_in_teacher(request)
         if student is None and teacher is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
         try:
             categories = Category.objects.all()
             data = []
             for category in categories:
                 data.append(to_json(category))
-            return get_response(200, data=data)
+            return get_response(logger, request, 200, data=data,
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500,
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
     else:
-        return get_response(405, data=[request.method, 'GET'])
+        return get_response(logger, request, 405, data=[request.method, 'GET'])
 
 
 def content_many(request):
     if request.method == 'POST':
         teacher = logged_in_teacher(request)
         if teacher is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
 
         body = get_body(request)
         required = ['category', 'title', 'type', 'content', 'level']
@@ -216,17 +211,17 @@ def content_many(request):
                 content=body['content'],
                 level=body['level']
             )
-            return get_response(200)
+            return get_response(logger, request, 200, teacher_id=teacher.id)
         except Category.DoesNotExist:
-            return get_response(400, msg='Category does not exist.')
+            return get_response(logger, request, 400, msg='Category does not exist.', teacher_id=teacher.id)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500, teacher_id=teacher.id)
     elif request.method == 'GET':
         student = logged_in_student(request)
         teacher = logged_in_teacher(request)
         if teacher is None and student is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
 
         data = {}
         categories = Category.objects.all()
@@ -239,12 +234,16 @@ def content_many(request):
                     contents_c = contents_t.filter(category=cat)
                     for content in contents_c:
                         data[t][cat.english].append(to_json(content))
-            return get_response(200, data=data)
+            return get_response(logger, request, 200, data=data,
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500,
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
     else:
-        return get_response(405, data=[request.method, 'POST', 'GET'])
+        return get_response(logger, request, 405, data=[request.method, 'POST', 'GET'])
 
 
 def content_one(request, content_id: int):
@@ -252,26 +251,56 @@ def content_one(request, content_id: int):
         student = logged_in_student(request)
         teacher = logged_in_teacher(request)
         if teacher is None and student is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
 
         try:
             content = Content.objects.get(id=content_id)
             data = get_detail_content(content)
-            return get_response(200, data=data)
+            return get_response(logger, request, 200, data=data,
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
         except Content.DoesNotExist:
-            return get_response(400, msg='Content does not exist.')
+            return get_response(logger, request, 400, msg='Content does not exist.',
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500,
+                                teacher_id=teacher.id if teacher is not None else None,
+                                student_id=student.id if student is not None else None)
+    elif request.method == 'PUT':
+        teacher = logged_in_teacher(request)
+        if teacher is None:
+            return get_response(logger, request, 401)
+
+        body = get_body(request)
+        try:
+            content = Content.objects.get(id=content_id)
+            if content.teacher_id != teacher.id:
+                return get_response(logger, request, 401, msg='Writer of content and user logged in does not match.')
+
+            if 'category' in body: content.category_id = body['category']
+            if 'title' in body: content.title = body['title']
+            if 'type' in body: content.type = body['type']
+            if 'content' in body: content.content = body['content']
+            if 'level' in body: content.level = body['level']
+            content.save()
+
+            return get_response(logger, request, 200, teacher_id=teacher.id)
+        except Category.DoesNotExist:
+            return get_response(logger, request, 400, msg='Category does not exist.', teacher_id=teacher.id)
+        except:
+            traceback.print_exc()
+            return get_response(logger, request, 500, teacher_id=teacher.id)
     else:
-        return get_response(405, data=[request.method, 'GET'])
+        return get_response(logger, request, 405, data=[request.method, 'GET', 'PUT'])
 
 
 def curriculum_many(request):
     if request.method == 'POST':
         student = logged_in_student(request)
         if student is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
 
         body = get_body(request)
 
@@ -292,24 +321,24 @@ def curriculum_many(request):
                         else timezone.now()
                 curriculum.save()
 
-            return get_response(200)
+            return get_response(logger, request, 200, student_id=student.id)
         except Student.DoesNotExist:
-            return get_response(400, msg='Student does not exist.')
+            return get_response(logger, request, 400, msg='Student does not exist.', student_id=student.id)
         except Content.DoesNotExist:
-            return get_response(400, msg='Content does not exist.')
+            return get_response(logger, request, 400, msg='Content does not exist.', student_id=student.id)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500, student_id=student.id)
     elif request.method == 'GET':
         student = logged_in_student(request)
         if student is None:
-            return get_response(401)
+            return get_response(logger, request, 401)
         try:
             contents = Curriculum.objects.filter(student=student)
             data = [{'content_id': c.id, 'percentage': c.percentage, 'score': c.score, 'end_datetime': c.end_datetime} for c in contents]
-            return get_response(200, data=data)
+            return get_response(logger, request, 200, data=data, student_id=student.id)
         except:
             traceback.print_exc()
-            return get_response(500)
+            return get_response(logger, request, 500, student_id=student.id)
     else:
-        return get_response(405, data=[request.method, 'POST', 'GET'])
+        return get_response(logger, request, 405, data=[request.method, 'POST', 'GET'])

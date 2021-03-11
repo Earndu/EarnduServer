@@ -11,7 +11,11 @@ def get_body(request):
     try:
         return json.loads(request.body)
     except:
-        return request.POST
+        if request.method == 'POST':
+            return request.POST
+        elif request.method == 'PUT':
+            return request.PUT
+        return {}
 
 
 def logged_in_student(request) -> Student or None:
@@ -48,13 +52,18 @@ def verify_data(data: dict, contains: list) -> JsonResponse or None:
     return None
 
 
-def get_response(code: int, data: dict or list = None, msg: str = None) -> JsonResponse:
+def get_response(logger, request, code: int, data: dict or list = None, msg: str = None, teacher_id: int = None, student_id: int = None) -> JsonResponse:
     """
+    :param logger: logger
+    :param request: original request for logging
     :param code: status code for response
     :param data: body for response or data included in message
     :param msg: message for error
+    :param teacher_id: teacher id for logging
+    :param student_id: student id for logging
     :return:
     """
+    response = {}
     if code == 200:  # Success
         response = {
             'status_code': code,
@@ -62,27 +71,37 @@ def get_response(code: int, data: dict or list = None, msg: str = None) -> JsonR
         }
         if data is not None:
             response['data'] = data
-        return JsonResponse(response)
     elif code == 400:  # Unknown user error
-        return JsonResponse({
+        response = {
             'status_code': code,
             'message': msg,
-        })
+        }
     elif code == 401:  # Unknown user error
-        return JsonResponse({
+        response = {
             'status_code': code,
             'message': 'User is unauthorized.',
-        })
+        }
     elif code == 405:  # Method is not allowed
-        return JsonResponse({
+        response = {
             'status_code': code,
             'message': msg if msg else 'Method %s is not allowed. (%s)' % (data[0], ', '.join(data[1:]))
-        })
+        }
     elif code == 500:  # Unknown server error
-        return JsonResponse({
+        response = {
             'status_code': code,
             'message': msg if msg else 'Internal server error.'
-        })
+        }
+
+    logger.info('%(path)s\t%(method)s\t%(code)s\t(%(teacher_id)s/%(student_id)s)\t%(body)s\t"%(response)s"' %{
+        'path': request.path,
+        'method': request.method,
+        'code': response['status_code'],
+        'teacher_id': teacher_id,
+        'student_id': student_id,
+        'body': get_body(request),
+        'response': response['message']
+    })
+    return JsonResponse(response)
 
 
 def to_json(object: Teacher or Student or Content or Category or Curriculum) -> dict:
