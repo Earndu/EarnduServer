@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from study.models import Teacher, Student, Content, Category, Curriculum
 import json
+import traceback
 
 
 def get_body(request):
@@ -91,6 +92,8 @@ def get_response(logger, request, code: int, data: dict or list = None, msg: str
             'status_code': code,
             'message': msg if msg else 'Internal server error.'
         }
+
+        logger.error(traceback.format_exc())
 
     logger.info('%(path)s\t%(method)s\t%(code)s\t(%(teacher_id)s/%(student_id)s)\t%(body)s\t"%(response)s"' %{
         'path': request.path,
