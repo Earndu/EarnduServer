@@ -139,7 +139,10 @@ def to_json(object: Teacher or Student or Content or Category or Curriculum) -> 
         }
     elif isinstance(object, Curriculum):
         return {
-
+            'content_id': object.id,
+            'percentage': object.percentage,
+            'score': object.score,
+            'end_datetime': object.end_datetime
         }
 
 
