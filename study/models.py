@@ -41,3 +41,16 @@ class Curriculum(models.Model):
     percentage = models.IntegerField()
     score = models.IntegerField(null=True)
     end_datetime = models.DateTimeField(null=True)
+
+
+class Quiz(models.Model):
+    content = models.ForeignKey('Content', on_delete=models.CASCADE)
+    question = models.TextField()
+    answer_1 = models.TextField()
+    answer_2 = models.TextField()
+    answer_3 = models.TextField()
+    answer_4 = models.TextField()
+    answer = models.IntegerField()
+    res_image = models.TextField(null=True)
+    res_sound = models.TextField(null=True)
+    level = models.IntegerField()

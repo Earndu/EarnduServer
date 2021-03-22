@@ -1,5 +1,5 @@
 import json
-from study.models import Teacher, Student, Content, Category, Curriculum
+from study.models import Teacher, Student, Content, Category, Curriculum, Quiz
 import traceback
 from django.db.utils import IntegrityError
 from study.utils import get_response, verify_data, to_json, get_body, logged_in_student, logged_in_teacher, \
@@ -203,7 +203,7 @@ def content_many(request):
             return verify
 
         try:
-            Content.objects.create(
+            content = Content.objects.create(
                 category=Category.objects.get(id=body['category']),
                 teacher=teacher,
                 title=body['title'],
@@ -213,6 +213,23 @@ def content_many(request):
                 res_image=body['res_image'] if 'res_image' in body else None,
                 res_sound=body['res_sound'] if 'res_sound' in body else None
             )
+
+            if 'quiz' in body:
+                quizs = body['quiz']
+                for quiz in quizs:
+                    Quiz.objects.create(
+                        content=content,
+                        question=quiz['question'],
+                        answer_1=quiz['answer_1'],
+                        answer_2=quiz['answer_2'],
+                        answer_3=quiz['answer_3'],
+                        answer_4=quiz['answer_4'],
+                        answer=quiz['answer'],
+                        res_sound=quiz['res_sound'] if 'res_sound' in quiz else None,
+                        res_image=quiz['res_image'] if 'res_image' in quiz else None,
+                        level=quiz['level']
+                    )
+
             return get_response(logger, request, 200, teacher_id=teacher.id)
         except Category.DoesNotExist:
             return get_response(logger, request, 400, msg='Category does not exist.', teacher_id=teacher.id)
@@ -289,6 +306,21 @@ def content_one(request, content_id: int):
             if 'res_image' in body: content.res_image = body['res_image']
             if 'res_sound' in body: content.res_sound = body['res_sound']
             content.save()
+
+            if 'quiz' in body:
+                quizs = body['quiz']
+                for _quiz in quizs:
+                    quiz = Quiz.objects.get(id=_quiz['quiz_id'])
+                    if 'question' in _quiz: quiz.question = _quiz['question']
+                    if 'answer_1' in _quiz: quiz.answer_1 = _quiz['answer_1']
+                    if 'answer_2' in _quiz: quiz.answer_2 = _quiz['answer_2']
+                    if 'answer_3' in _quiz: quiz.answer_3 = _quiz['answer_3']
+                    if 'answer_4' in _quiz: quiz.answer_4 = _quiz['answer_4']
+                    if 'answer' in _quiz: quiz.answer = _quiz['answer']
+                    if 'res_image' in _quiz: quiz.res_image = _quiz['res_image']
+                    if 'res_sound' in _quiz: quiz.res_sound = _quiz['res_sound']
+                    if 'level' in _quiz: quiz.level = _quiz['level']
+                    quiz.save()
 
             return get_response(logger, request, 200, teacher_id=teacher.id)
         except Category.DoesNotExist:
