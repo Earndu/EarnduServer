@@ -31,7 +31,8 @@ class Content(models.Model):
     type = models.IntegerField()
     content = models.TextField()
     level = models.IntegerField()
-    # view_count, total
+    res_image = models.TextField(null=True)
+    res_sound = models.TextField(null=True)
 
 
 class Curriculum(models.Model):
