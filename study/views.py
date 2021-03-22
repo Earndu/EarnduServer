@@ -209,7 +209,9 @@ def content_many(request):
                 title=body['title'],
                 type=body['type'],
                 content=body['content'],
-                level=body['level']
+                level=body['level'],
+                res_image=body['res_image'] if 'res_image' in body else None,
+                res_sound=body['res_sound'] if 'res_sound' in body else None
             )
             return get_response(logger, request, 200, teacher_id=teacher.id)
         except Category.DoesNotExist:
@@ -284,6 +286,8 @@ def content_one(request, content_id: int):
             if 'type' in body: content.type = body['type']
             if 'content' in body: content.content = body['content']
             if 'level' in body: content.level = body['level']
+            if 'res_image' in body: content.res_image = body['res_image']
+            if 'res_sound' in body: content.res_sound = body['res_sound']
             content.save()
 
             return get_response(logger, request, 200, teacher_id=teacher.id)

@@ -154,5 +154,7 @@ def get_detail_content(content: Content) -> dict:
             'id': content.teacher_id,
             'fullname': content.teacher.fullname
         },
-        'content': content.content
+        'content': content.content,
+        'res_image': content.res_image,
+        'res_sound': content.res_sound
     }
