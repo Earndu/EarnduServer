@@ -339,7 +339,7 @@ def curriculum_many(request):
             return get_response(logger, request, 401)
         try:
             contents = Curriculum.objects.filter(student=student)
-            data = [{'content_id': c.id, 'percentage': c.percentage, 'score': c.score, 'end_datetime': c.end_datetime} for c in contents]
+            data = [to_json(c) for c in contents]
             return get_response(logger, request, 200, data=data, student_id=student.id)
         except:
             traceback.print_exc()
