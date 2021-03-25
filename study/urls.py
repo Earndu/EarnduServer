@@ -11,4 +11,5 @@ urlpatterns = [
     path('content/<int:content_id>', views.content_one),
     path('logout', views.logout),
     path('curriculum', views.curriculum_many),
+    path('student/total', views.student_total),
 ]
