@@ -10,6 +10,64 @@ import logging
 logger = logging.getLogger('std.file')
 
 
+def student_total(request):
+    if request.method == 'POST':
+        body = get_body(request)
+        required = ['username', 'password']
+        verify = verify_data(body, required)
+        if verify:
+            return get_response(logger, request, 400, msg='(%s) is required in body.' % (', '.join(required)))
+
+        wish_list = body['wish_list'] if 'wish_list' in body else []
+        curriculums = body['curriculum'] if 'curriculum' in body else []
+
+
+        try:
+            student = Student.objects.get(username=body['username'], password=body['password'])
+
+            for cur in curriculums:
+                curriculum, created = Curriculum.objects.get_or_create(
+                    student=student,
+                    content=Content.objects.get(id=cur['content_id']),
+                    defaults={"percentage": cur['percentage']}
+                )
+                if not created:
+                    curriculum.percentage = cur['percentage']
+                if 'score' in cur:
+                    # Save score and end datetime if student take test
+                    curriculum.score = cur['score']
+                    curriculum.end_datetime = cur['end_datetime'] \
+                        if 'end_datetime' in cur \
+                        else timezone.now()
+                curriculum.save()
+
+            categories = Category.objects.all()
+
+            content_data = {
+                t:{
+                    cat.english: [
+                        to_json(content) for content in Content.objects.filter(type=int(t), category=cat)
+                    ] for cat in categories
+                } for t in ['0', '1', '2', '3']
+            }
+
+            wish_list_data = [get_detail_content(Content.objects.get(id=c_id)) for c_id in wish_list]
+            curriculum_data = [to_json(cur) for cur in Curriculum.objects.filter(student=student)]
+
+            return get_response(logger, request, 200, data={
+                'content_list': content_data,
+                'wish_list': wish_list_data,
+                'curriculum': curriculum_data
+            }, student_id=student.id)
+        except Student.DoesNotExist:
+            return get_response(logger, request, 400, msg='Username or password does not match.')
+        except:
+            traceback.print_exc()
+            return get_response(logger, request, 500)
+    else:
+        return get_response(logger, request, 405, data=[request.method, 'POST'])
+
+
 def teacher_many(request):
     if request.method == 'POST':  # Insert new teacher data
         body = get_body(request)
