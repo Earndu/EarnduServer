@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from study.models import Teacher, Student, Content, Category, Curriculum
 import json
 import traceback
@@ -53,7 +53,7 @@ def verify_data(data: dict, contains: list) -> str or None:
     return None
 
 
-def get_response(logger, request, code: int, data: dict or list = None, msg: str = None, teacher_id: int = None, student_id: int = None) -> JsonResponse:
+def get_response(logger, request, code: int, data: dict or list = None, msg: str = None, teacher_id: int = None, student_id: int = None) -> HttpResponse:
     """
     :param logger: logger
     :param request: original request for logging
@@ -104,7 +104,7 @@ def get_response(logger, request, code: int, data: dict or list = None, msg: str
         'body': get_body(request),
         'response': response['message']
     })
-    return JsonResponse(response)
+    return HttpResponse(json.dumps(response, ensure_ascii=False), content_type=u"application/json; charset=utf-8")
 
 
 def to_json(object: Teacher or Student or Content or Category or Curriculum) -> dict:
@@ -142,7 +142,7 @@ def to_json(object: Teacher or Student or Content or Category or Curriculum) -> 
             'content_id': object.id,
             'percentage': object.percentage,
             'score': object.score,
-            'end_datetime': object.end_datetime
+            'end_datetime': str(object.end_datetime)
         }
 
 
