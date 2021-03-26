@@ -1,11 +1,17 @@
 import json
+
+from django.shortcuts import render
+
 from study.models import Teacher, Student, Content, Category, Curriculum
+from study.forms import ContentForm
 import traceback
 from django.db.utils import IntegrityError
 from study.utils import get_response, verify_data, to_json, get_body, logged_in_student, logged_in_teacher, \
     get_detail_content
 from django.utils import timezone
 import logging
+import re
+import base64
 
 logger = logging.getLogger('std.file')
 
@@ -404,3 +410,36 @@ def curriculum_many(request):
             return get_response(logger, request, 500, student_id=student.id)
     else:
         return get_response(logger, request, 405, data=[request.method, 'POST', 'GET'])
+
+
+def content_add(request):
+    if request.method == 'POST':
+        try:
+            body = request.POST
+            images = request.FILES.getlist('images')
+            teacher = Teacher.objects.get(username=body['username'], password=body['password'])
+            content = body['content']
+            content = re.sub('\n|\r', '', content)
+            content = re.sub('</{0,1}br/{0,1}>', '\n', content)
+
+            b64 = '<SEP>'.join(['data:%s;base64,%s' %(image.content_type, str(base64.b64encode(image.file.read()))[2:-1]) for image in images])
+
+            Content.objects.create(
+                category_id=body['category'],
+                teacher=teacher,
+                title=body['title'],
+                type=body['type'],
+                content=content,
+                level=body['level'],
+                res_image=b64
+            )
+            context = {'title': body['title'], 'form': ContentForm()}
+            return render(request, 'study/add_content.html', context)
+        except Teacher.DoesNotExist:
+            return get_response(logger, request, 400, msg='Username or password does not match.')
+        except:
+            traceback.print_exc()
+            return get_response(logger, request, 500)
+    else:
+        context = {'form': ContentForm()}
+        return render(request, 'study/add_content.html', context)
