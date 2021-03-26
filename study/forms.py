@@ -7,5 +7,5 @@ class ContentForm(forms.Form):
     title = forms.CharField()
     category = forms.ChoiceField(choices=[(cat.id, cat.english) for cat in Category.objects.all()])
     type = forms.ChoiceField(choices=((0,'Text'), (2,'Voice'), (3,'Image')))
-    content = forms.CharField(widget=forms.widgets.Textarea(attrs={'rows': 30, 'cols': 100}))
+    content = forms.CharField(widget=forms.widgets.Textarea(attrs={'rows': 30, 'cols': 100}), required=False)
     level = forms.IntegerField()
