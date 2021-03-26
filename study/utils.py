@@ -41,7 +41,7 @@ def logged_in_teacher(request) -> Teacher or None:
     return None
 
 
-def verify_data(data: dict, contains: list) -> JsonResponse or None:
+def verify_data(data: dict, contains: list) -> str or None:
     """
     :param data: body dict
     :param contains: contents must be contained in body
@@ -49,7 +49,7 @@ def verify_data(data: dict, contains: list) -> JsonResponse or None:
     """
     for c in contains:
         if c not in data:
-            return get_response(400, msg='(%s) is required in body.' % (', '.join(contains)))
+            return c
     return None
 
 
