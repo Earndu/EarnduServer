@@ -419,8 +419,8 @@ def content_add(request):
             images = request.FILES.getlist('images')
             teacher = Teacher.objects.get(username=body['username'], password=body['password'])
             content = body['content']
-            content = re.sub('\n|\r', '', content)
-            content = re.sub('</{0,1}br/{0,1}>', '\n', content)
+            # content = re.sub('\n|\r', '', content)
+            # content = re.sub('</{0,1}br/{0,1}>', '\n', content)
 
             b64 = '<SEP>'.join(['data:%s;base64,%s' %(image.content_type, str(base64.b64encode(image.file.read()))[2:-1]) for image in images])
 
