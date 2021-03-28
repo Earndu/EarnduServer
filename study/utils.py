@@ -154,7 +154,7 @@ def to_json(object: Teacher or Student or Content or Category or Curriculum) -> 
 def get_detail_content(content: Content) -> dict:
     return {
         'id': content.id,
-        'category': content.category_id,
+        'category': content.category.english,
         'type': content.type,
         'title': content.title,
         'level': content.level,
