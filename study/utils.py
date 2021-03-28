@@ -117,14 +117,14 @@ def to_json(object: Teacher or Student or Content or Category or Curriculum) -> 
             'username': object.username,
             'fullname': object.fullname,
             'email': object.email,
-            'birthday': object.birthday
+            'birthday': str(object.birthday)
         }
     elif isinstance(object, Student):
         return {
             'username': object.username,
             'fullname': object.fullname,
             'email': object.email,
-            'birthday': object.birthday,
+            'birthday': str(object.birthday),
             'image_id': object.image_id
         }
     elif isinstance(object, Content):
