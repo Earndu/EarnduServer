@@ -61,6 +61,7 @@ def student_total(request):
             curriculum_data = [to_json(cur) for cur in Curriculum.objects.filter(student=student)]
 
             return get_response(logger, request, 200, data={
+                'user_data': to_json(student),
                 'content_list': content_data,
                 'wish_list': wish_list_data,
                 'curriculum': curriculum_data
