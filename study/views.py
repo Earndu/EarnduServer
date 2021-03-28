@@ -293,7 +293,7 @@ def content_many(request):
         data = {}
         categories = Category.objects.all()
         try:
-            for t in ['0', '1', '2', '3']:
+            for t in ['0', '1', '2']:
                 contents_t = Content.objects.filter(type=int(t))
                 data[t] = {}
                 for cat in categories:
@@ -423,7 +423,7 @@ def content_add(request):
             # content = re.sub('\n|\r', '', content)
             # content = re.sub('</{0,1}br/{0,1}>', '\n', content)
 
-            b64 = '<SEP>'.join(['data:%s;base64,%s' %(image.content_type, str(base64.b64encode(image.file.read()))[2:-1]) for image in images])
+            b64 = '<SEP>'.join([str(base64.b64encode(image.file.read()))[2:-1] for image in images])
 
             Content.objects.create(
                 category_id=body['category'],
