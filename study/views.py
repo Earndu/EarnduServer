@@ -425,7 +425,7 @@ def content_add(request):
             # content = re.sub('</{0,1}br/{0,1}>', '\n', content)
 
             b64 = '<SEP>'.join([str(base64.b64encode(image.file.read()))[2:-1] for image in images])
-            b64_voice = str(base64.b64encode(voice.file.read()))[2:-1]
+            b64_voice = str(base64.b64encode(voice.file.read()))[2:-1] if voice is not None else None
 
             Content.objects.create(
                 category_id=body['category'],
