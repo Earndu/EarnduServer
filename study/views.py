@@ -418,12 +418,14 @@ def content_add(request):
         try:
             body = request.POST
             images = request.FILES.getlist('images')
+            voice = request.FILES.get('voice')
             teacher = Teacher.objects.get(username=body['username'], password=body['password'])
             content = body['content']
             # content = re.sub('\n|\r', '', content)
             # content = re.sub('</{0,1}br/{0,1}>', '\n', content)
 
             b64 = '<SEP>'.join([str(base64.b64encode(image.file.read()))[2:-1] for image in images])
+            b64_voice = str(base64.b64encode(voice.file.read()))[2:-1]
 
             Content.objects.create(
                 category_id=body['category'],
@@ -432,7 +434,8 @@ def content_add(request):
                 type=body['type'],
                 content=content,
                 level=body['level'],
-                res_image=b64
+                res_image=b64,
+                res_sound=b64_voice
             )
             context = {'title': body['title'], 'form': ContentForm()}
             return render(request, 'study/add_content.html', context)
