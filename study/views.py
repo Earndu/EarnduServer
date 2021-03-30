@@ -61,6 +61,7 @@ def student_total(request):
             curriculum_data = [to_json(cur) for cur in Curriculum.objects.filter(student=student)]
 
             return get_response(logger, request, 200, data={
+                'user_data': to_json(student),
                 'content_list': content_data,
                 'wish_list': wish_list_data,
                 'curriculum': curriculum_data
@@ -292,7 +293,7 @@ def content_many(request):
         data = {}
         categories = Category.objects.all()
         try:
-            for t in ['0', '1', '2', '3']:
+            for t in ['0', '1', '2']:
                 contents_t = Content.objects.filter(type=int(t))
                 data[t] = {}
                 for cat in categories:
@@ -417,12 +418,14 @@ def content_add(request):
         try:
             body = request.POST
             images = request.FILES.getlist('images')
+            voice = request.FILES.get('voice')
             teacher = Teacher.objects.get(username=body['username'], password=body['password'])
             content = body['content']
-            content = re.sub('\n|\r', '', content)
-            content = re.sub('</{0,1}br/{0,1}>', '\n', content)
+            # content = re.sub('\n|\r', '', content)
+            # content = re.sub('</{0,1}br/{0,1}>', '\n', content)
 
-            b64 = '<SEP>'.join(['data:%s;base64,%s' %(image.content_type, str(base64.b64encode(image.file.read()))[2:-1]) for image in images])
+            b64 = '<SEP>'.join([str(base64.b64encode(image.file.read()))[2:-1] for image in images])
+            b64_voice = str(base64.b64encode(voice.file.read()))[2:-1]
 
             Content.objects.create(
                 category_id=body['category'],
@@ -431,7 +434,8 @@ def content_add(request):
                 type=body['type'],
                 content=content,
                 level=body['level'],
-                res_image=b64
+                res_image=b64,
+                res_sound=b64_voice
             )
             context = {'title': body['title'], 'form': ContentForm()}
             return render(request, 'study/add_content.html', context)

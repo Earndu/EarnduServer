@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from study.models import Teacher, Student, Content, Category, Curriculum
 import json
 import traceback
@@ -53,7 +53,7 @@ def verify_data(data: dict, contains: list) -> str or None:
     return None
 
 
-def get_response(logger, request, code: int, data: dict or list = None, msg: str = None, teacher_id: int = None, student_id: int = None) -> JsonResponse:
+def get_response(logger, request, code: int, data: dict or list = None, msg: str = None, teacher_id: int = None, student_id: int = None) -> HttpResponse:
     """
     :param logger: logger
     :param request: original request for logging
@@ -104,7 +104,7 @@ def get_response(logger, request, code: int, data: dict or list = None, msg: str
         'body': get_body(request),
         'response': response['message']
     })
-    return JsonResponse(response)
+    return HttpResponse(json.dumps(response, ensure_ascii=False), content_type=u"application/json; charset=utf-8")
 
 
 def to_json(object: Teacher or Student or Content or Category or Curriculum) -> dict:
@@ -117,10 +117,15 @@ def to_json(object: Teacher or Student or Content or Category or Curriculum) -> 
             'username': object.username,
             'fullname': object.fullname,
             'email': object.email,
-            'birthday': object.birthday
+            'birthday': str(object.birthday)
         }
     elif isinstance(object, Student):
         return {
+            'username': object.username,
+            'fullname': object.fullname,
+            'email': object.email,
+            'birthday': str(object.birthday),
+            'image_id': object.image_id
         }
     elif isinstance(object, Content):
         return {
@@ -142,14 +147,14 @@ def to_json(object: Teacher or Student or Content or Category or Curriculum) -> 
             'content_id': object.id,
             'percentage': object.percentage,
             'score': object.score,
-            'end_datetime': object.end_datetime
+            'end_datetime': str(object.end_datetime)
         }
 
 
 def get_detail_content(content: Content) -> dict:
     return {
         'id': content.id,
-        'category': content.category_id,
+        'category': content.category.english,
         'type': content.type,
         'title': content.title,
         'level': content.level,
