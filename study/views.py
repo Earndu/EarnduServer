@@ -437,7 +437,7 @@ def content_add(request, client=None):
                 res_image=b64,
                 res_sound=b64_voice
             )
-            context = {'title': body['title'], 'form': ContentForm()}
+            context = {'title': body['title'], 'form': ContentFormMobile() if client == 'm' else ContentForm()}
             return render(request, 'study/add_content.html', context)
         except Teacher.DoesNotExist:
             return get_response(logger, request, 400, msg='Username or password does not match.')
