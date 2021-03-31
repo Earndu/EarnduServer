@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render
 
 from study.models import Teacher, Student, Content, Category, Curriculum
-from study.forms import ContentForm
+from study.forms import ContentForm, ContentFormMobile
 import traceback
 from django.db.utils import IntegrityError
 from study.utils import get_response, verify_data, to_json, get_body, logged_in_student, logged_in_teacher, \
@@ -445,5 +445,5 @@ def content_add(request, client=None):
             traceback.print_exc()
             return get_response(logger, request, 500)
     else:
-        context = {'form': ContentForm()}
-        return render(request, 'study/add_content_mobile.html' if client == 'm' else 'study/add_content.html', context)
+        context = {'form': ContentFormMobile() if client == 'm' else ContentForm()}
+        return render(request, 'study/add_content.html', context)
