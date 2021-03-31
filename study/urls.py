@@ -12,5 +12,6 @@ urlpatterns = [
     path('logout', views.logout),
     path('curriculum', views.curriculum_many),
     path('student/total', views.student_total),
-    path('content/add', views.content_add)
+    path('content/add', views.content_add),
+    path('<str:client>/content/add', views.content_add)
 ]

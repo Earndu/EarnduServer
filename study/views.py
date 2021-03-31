@@ -413,7 +413,7 @@ def curriculum_many(request):
         return get_response(logger, request, 405, data=[request.method, 'POST', 'GET'])
 
 
-def content_add(request):
+def content_add(request, client=None):
     if request.method == 'POST':
         try:
             body = request.POST
@@ -446,4 +446,4 @@ def content_add(request):
             return get_response(logger, request, 500)
     else:
         context = {'form': ContentForm()}
-        return render(request, 'study/add_content.html', context)
+        return render(request, 'study/add_content_mobile.html' if client == 'm' else 'study/add_content.html', context)
